@@ -16,31 +16,24 @@ export default function Login() {
     e.preventDefault()
     setError('')
     setSuccess(false)
-
     if (!email.trim()) { setError('Por favor ingresa tu correo electrónico.'); return }
     if (!password) { setError('Por favor ingresa tu contraseña.'); return }
-
     setLoading(true)
-
-    const { data, error: authError } = await supabase.auth.signInWithPassword({
+    const { error: authError } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password: password,
     })
-
     if (authError) {
-      setError('Correo o contraseña incorrectos. Por favor verifica tus datos e intenta nuevamente.')
+      setError('Correo o contraseña incorrectos. Por favor verifica tus datos.')
       setLoading(false)
       return
     }
-
     setSuccess(true)
     setTimeout(() => navigate('/dashboard'), 1500)
   }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-
-      {/* HEADER */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
           <button onClick={() => navigate('/')} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
@@ -60,29 +53,23 @@ export default function Login() {
         </div>
       </header>
 
-      {/* BARRA NARANJA */}
       <div className="bg-orange-500 py-2 px-6 text-center">
         <p className="text-white text-xs font-medium">
-          🔐 Estás ingresando a la Zona Segura de Alfin Banco · Verifica que la URL sea <span className="font-bold underline">alfinbanco.pe</span>
+          🔐 Estás ingresando a la Zona Segura de Alfin Banco
         </p>
       </div>
 
-      {/* CONTENIDO */}
       <main className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
-
           <div className="bg-white rounded-3xl p-8 shadow-lg border border-gray-100">
-
-            {/* Header */}
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
                 <Shield className="w-8 h-8 text-orange-500" />
               </div>
               <h1 className="text-2xl font-black text-gray-800 mb-1">Ingresa a tu cuenta</h1>
-              <p className="text-gray-400 text-sm">Banca por Internet · Alfin Banco · Personas</p>
+              <p className="text-gray-400 text-sm">Banca por Internet · Alfin Banco</p>
             </div>
 
-            {/* ERROR */}
             {error && (
               <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
                 <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
@@ -90,7 +77,6 @@ export default function Login() {
               </div>
             )}
 
-            {/* ÉXITO */}
             {success && (
               <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
                 <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
@@ -101,19 +87,14 @@ export default function Login() {
               </div>
             )}
 
-            {/* FORMULARIO */}
             <form onSubmit={handleLogin} className="space-y-5" noValidate>
-
               <div>
-                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Correo electrónico
-                </label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Correo electrónico</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                     <Mail className="w-4 h-4 text-gray-400" />
                   </div>
                   <input
-                    id="email"
                     type="email"
                     value={email}
                     onChange={(e) => { setEmail(e.target.value); setError('') }}
@@ -126,15 +107,12 @@ export default function Login() {
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Contraseña
-                </label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Contraseña</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                     <Lock className="w-4 h-4 text-gray-400" />
                   </div>
                   <input
-                    id="password"
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => { setPassword(e.target.value); setError('') }}
@@ -154,16 +132,10 @@ export default function Login() {
                 </div>
               </div>
 
-              <div className="flex justify-end">
-                <a href="#" className="text-orange-500 hover:text-orange-600 text-xs font-medium transition-colors">
-                  ¿Olvidaste tu contraseña?
-                </a>
-              </div>
-
               <button
                 type="submit"
                 disabled={loading || success}
-                className="w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl text-sm transition-all shadow-md shadow-orange-200 hover:shadow-orange-300 hover:-translate-y-0.5"
+                className="w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl text-sm transition-all shadow-md shadow-orange-200 hover:-translate-y-0.5 mt-2"
               >
                 {loading ? (
                   <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /><span>Verificando...</span></>
@@ -185,7 +157,6 @@ export default function Login() {
               </button>
             </div>
           </div>
-
           <p className="text-gray-400 text-xs text-center mt-5">
             🔒 Alfin Banco nunca te pedirá tu contraseña por teléfono o correo
           </p>
@@ -193,9 +164,7 @@ export default function Login() {
       </main>
 
       <footer className="bg-white border-t border-gray-100 py-5 px-6 text-center">
-        <p className="text-gray-400 text-xs">
-          © 2025 Alfin Banco S.A. · RUC: 20517476405 · Supervisado por la SBS del Perú
-        </p>
+        <p className="text-gray-400 text-xs">© 2025 Alfin Banco S.A. · RUC: 20517476405 · Supervisado por la SBS del Perú</p>
       </footer>
     </div>
   )
