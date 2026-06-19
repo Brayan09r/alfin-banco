@@ -498,3 +498,43 @@ def transicion_mora(transicion: TransicionMoraModel, current=Depends(get_current
 def get_productos():
     result = supabase.table("productos_credito").select("*").execute()
     return result.data
+# ============================================================
+# ENDPOINT: Listar clientes para el Core Bancario
+# ============================================================
+
+@app.get("/api/clientes")
+def listar_clientes(current=Depends(get_current_user)):
+    perfil = current["perfil"]
+    rol = perfil["roles"]["nombre"]
+
+    if rol not in ["asesor", "administrador", "riesgos", "comite", "gerencia"]:
+        raise HTTPException(status_code=403, detail="Sin permisos para ver clientes")
+
+    try:
+        result = supabase.table("usuarios")\
+            .select("*, roles(nombre), empresas(*), cuentas(*)")\
+            .eq("rol_id", 1)\
+            .order("nombre_completo")\
+            .execute()
+        return result.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/clientes/{cliente_id}")
+def get_cliente(cliente_id: str, current=Depends(get_current_user)):
+    perfil = current["perfil"]
+    rol = perfil["roles"]["nombre"]
+
+    if rol not in ["asesor", "administrador", "riesgos", "comite", "gerencia"]:
+        raise HTTPException(status_code=403, detail="Sin permisos")
+
+    try:
+        result = supabase.table("usuarios")\
+            .select("*, empresas(*), cuentas(*)")\
+            .eq("id", cliente_id)\
+            .single()\
+            .execute()
+        return result.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
