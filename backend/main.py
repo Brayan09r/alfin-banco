@@ -3,7 +3,7 @@
 # FastAPI + Supabase
 # ============================================================
 
-from fastapi import FastAPI, HTTPException, Header, Depends
+from fastapi import FastAPI, HTTPException, Header, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from supabase import create_client, Client
 from dotenv import load_dotenv
@@ -11,6 +11,11 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime, timedelta
 import os
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from starlette.middleware.base import BaseHTTPMiddleware
+import logging
 
 load_dotenv()
 
@@ -19,6 +24,27 @@ SUPABASE_SERVICE_KEY: str = os.environ.get("SUPABASE_SERVICE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
 app = FastAPI(title="Alfin Banco Core API", version="2.0.0")
+
+# Security Headers Middleware
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        return response
+
+# Rate limiting
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SecurityHeadersMiddleware)
+
+# Logger
+logger = logging.getLogger("alfin-banco")
+logging.basicConfig(level=logging.INFO)
 
 app.add_middleware(
     CORSMiddleware,
@@ -93,7 +119,8 @@ def root():
 # ============================================================
 
 @app.get("/api/user-data")
-def get_user_data(current=Depends(get_current_user)):
+@limiter.limit("5/minute")
+async def get_user_data(request: Request, current=Depends(get_current_user)):
     user = current["user"]
     perfil = current["perfil"]
 
