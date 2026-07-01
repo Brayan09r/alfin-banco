@@ -31,6 +31,13 @@ function MenuCard({ icon: Icon, title, desc, onClick, color, badge }) {
     </button>
   )
 }
+<MenuCard
+  icon={TrendingUp}
+  title="Dashboard Analítico"
+  desc="KPIs, gráficos de cartera, mora y solicitudes"
+  onClick={() => navigate('/analytics')}
+  color="border-indigo-100"
+/>
 
 function DataRow({ label, value, icon: Icon }) {
   return (

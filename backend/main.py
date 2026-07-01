@@ -259,7 +259,8 @@ def aprobar_solicitud(aprobacion: AprobacionModel, current=Depends(get_current_u
     # Si aprobado → desembolsar
     if aprobacion.decision == "aprobado":
         producto = supabase.table("productos_credito").select("*").eq("id", sol["producto_id"]).single().execute()
-        tasa = producto.data["tasa_interes"] / 100 / 12
+        tea = producto.data["tasa_interes"] / 100
+        tasa = (1 + tea) ** (1/12) - 1  # Conversión TEA → TEM correcta
         plazo = sol["plazo_meses"]
         monto_credito = sol["monto_solicitado"]
 

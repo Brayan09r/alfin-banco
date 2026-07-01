@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard'
 import SolicitudCredito from './pages/SolicitudCredito'
 import CoreBancario from './pages/CoreBancario'
 import Mora from './pages/Mora'
+import AnalyticsDashboard from './pages/AnalyticsDashboard'
 
 function ProtectedRoute({ session, children }) {
   if (!session) return <Navigate to="/login" replace />
@@ -63,6 +64,11 @@ export default function App() {
         <Route path="/mora" element={
           <ProtectedRoute session={session}>
             <Mora />
+          </ProtectedRoute>
+        } />
+        <Route path="/analytics" element={
+          <ProtectedRoute session={session}>
+            <AnalyticsDashboard />
           </ProtectedRoute>
         } />
 
