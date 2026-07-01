@@ -337,29 +337,25 @@ def aprobar_solicitud(aprobacion: AprobacionModel, current=Depends(get_current_u
 # CRITERIO 1: CRÉDITOS Y CRONOGRAMA
 # ============================================================
 
-@app.get("/api/creditos")
-def listar_creditos(current=Depends(get_current_user)):
-    perfil = current["perfil"]
-    rol = perfil["roles"]["nombre"]
-    user = current["user"]
-
-    try:
-        if rol == "cliente":
-            result = supabase.table("creditos").select("*").eq("cliente_id", user.id).execute()
-        else:
-            result = supabase.table("creditos").select("*, usuarios!creditos_cliente_id_fkey(nombre_completo, dni)").execute()
-        return result.data
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
 @app.get("/api/creditos/{credito_id}/cronograma")
 def get_cronograma(credito_id: int, current=Depends(get_current_user)):
+    user = current["user"]
+    perfil = current["perfil"]
+    rol = perfil["roles"]["nombre"]
+    
     try:
+        # Verificar que el crédito pertenece al cliente
+        if rol == "cliente":
+            credito = supabase.table("creditos").select("cliente_id").eq("id", credito_id).single().execute()
+            if credito.data["cliente_id"] != user.id:
+                raise HTTPException(status_code=403, detail="Acceso denegado")
+        
         result = supabase.table("cuotas").select("*").eq("credito_id", credito_id).order("numero_cuota").execute()
         return result.data
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
 
 
 # ============================================================
